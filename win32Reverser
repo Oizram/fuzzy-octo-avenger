@@ -1,0 +1,56 @@
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[])
+{
+	HANDLE h;
+	DWORD maxByte;
+	LPCSTR file = argv[1];
+	h = CreateFile(file, GENERIC_READ, FILE_SHARE_READ, NULL,
+				   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(!(h))
+	{
+		perror("error is: ");
+	}
+
+	maxByte = GetFileSize(h, NULL);
+	if(!(maxByte))
+	{
+		perror("error is: ");
+	}
+
+	DWORD pt = SetFilePointer(h, -1L, NULL, FILE_END);
+	if(!(pt))
+	{
+		perror("error is: ");
+	}
+
+	LPVOID buf;
+	PDWORD *readBytes;
+	while(maxByte>0)
+	{
+		maxByte--;
+
+		BOOL read = ReadFile(h, &buf, 1, &readBytes, NULL);
+		if(!(read))
+		{
+			perror("error is: ");
+		}
+
+		printf("%c", buf);
+
+		DWORD pt = SetFilePointer(h, -2L, NULL, FILE_CURRENT);
+		if(!(pt) && maxByte<=0)
+		{
+			perror("error is: ");
+		}
+	}
+
+	BOOL close = CloseHandle(h);
+	if(!(close))
+	{
+		perror("error is: ");
+	}
+	return 0;
+}
